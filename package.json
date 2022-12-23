@@ -11,10 +11,22 @@
   "dependencies": {
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
+    "@ethersproject/abi": "^5.7.0",
+    "@ethersproject/address": "^5.7.0",
+    "@ethersproject/constants": "^5.7.0",
+    "@ethersproject/contracts": "^5.7.0",
+    "@ethersproject/providers": "^5.7.2",
+    "@ethersproject/units": "^5.7.0",
     "@mui/icons-material": "^5.10.14",
     "@mui/material": "^5.10.14",
+    "@web3-react/core": "^6.1.9",
+    "@web3-react/injected-connector": "^6.0.7",
+    "@web3-react/walletconnect-connector": "^6.2.13",
+    "ethers": "^5.7.2",
     "styled-components": "^5.3.6",
-    "umi": "^4.0.32"
+    "umi": "^4.0.32",
+    "web3": "^1.8.1",
+    "web3-eth-abi": "^1.8.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
