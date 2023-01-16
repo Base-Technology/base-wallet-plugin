@@ -13,15 +13,14 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { ReactComponent as Logo } from "@/assets/logo.svg";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-// generatesaltvalue
 const ethers = require("ethers");
 const Web3 = require("web3");
 const truffleAssert = require("truffle-assertions");
-const web3 = new Web3("https://data-seed-prebsc-1-s3.binance.org:8545");
+const web3 = new Web3("https://bsc-testnet.public.blastapi.io");
 const ZERO_ADDRESS = ethers.constants.AddressZero;
-const refundAmount = 1000;
+const refundAmount = 1000000000000000;
 const ETH_TOKEN = ethers.constants.AddressZero;
 const ZERO_BYTES = "0x";
 let FactoryContract: Contract;
@@ -63,7 +62,7 @@ async function signMessage(message: any, signer: any) {
 
 const getSignerContract = () => {
   const provider = new JsonRpcProvider(
-    "https://data-seed-prebsc-1-s3.binance.org:8545",
+    "https://bsc-testnet.public.blastapi.io",
     97
   );
   FactoryContract = getContract(
@@ -107,59 +106,113 @@ function getContract(address: string, ABI: any, library: any, account?: any) {
   return new Contract(address, ABI, getProviderOrSigner(library, account));
 }
 
-const createClick = async () => {
-  console.log("testttttt");
-  let futureAddr;
-  const salt = ethers.utils.hexZeroPad(
-    ethers.BigNumber.from(ethers.utils.randomBytes(20)).toHexString(),
-    20
-  );
-  console.log("Salt: " + salt)
-  try {
-    futureAddr = await FactoryContract.getAddressForCounterfactualWallet(
-      owner,
-      modules,
-      salt,
-      { from: owner, gasLimit: 8000000, gasPrice: 1000000000 }
+const Register = () => {
+  //useState variables
+  const [addressCreated, setAddressCreated] = useState("");
+  const [addressCached, setAddressCached] = useState("");
+
+  const getSingleCacheData = async (cacheName: string, url: string) => {
+    if (typeof caches === "undefined") return false;
+
+    const cacheStorage = await caches.open(cacheName);
+    const cachedResponse = await cacheStorage.match(url);
+
+    return !cachedResponse || !cachedResponse.ok
+      ? setAddressCached("Fetched failed!")
+      : cachedResponse.json().then((item) => {
+          setAddressCached(item);
+        });
+  };
+
+  // add/fetch cache object
+  const cacheToFetch = {
+    cacheName: "UserAddress",
+    url: "http://localhost:8000/",
+  };
+
+  const addDataIntoCache = (
+    cacheName: string,
+    url: string,
+    response: string
+  ) => {
+    const data = new Response(JSON.stringify(response));
+    if ("caches" in window) {
+      caches.open(cacheName).then((cache) => {
+        cache.put(url, data);
+      });
+    }
+  };
+
+  const createClick = async () => {
+    console.log("testttttt");
+    let futureAddr;
+    const salt = ethers.utils.hexZeroPad(
+      ethers.BigNumber.from(ethers.utils.randomBytes(20)).toHexString(),
+      20
     );
-    console.log("Future address: " + futureAddr);
-  } catch (e) {
-    console.log(e);
-  }
-  // const ownerSig = await signRefund(futureAddr, refundAmount, ETH_TOKEN, owner);
-  //   await FactoryContractWithSigner.addManager(account, {
-  //     gasLimit: 8000000,
-  //     gasPrice: 10000000000,
-  //   });
-  await FactoryContractWithSigner.addManager(account);
-  await web3.eth.accounts.wallet.add(accPrivateKey);
-  const msg = ethers.utils.hexZeroPad(futureAddr, 32);
-  const managerSig = await signMessage(msg, account);
-  await web3.eth.accounts.wallet.add(ownerPrivateKey);
-  const ownerSig = await signRefund(futureAddr, refundAmount, ETH_TOKEN, owner);
-  try {
-    // const tx = await FactoryContract.createCounterfactualWallet(owner, modules, salt,  refundAmount, ETH_TOKEN, ownerSig, "0x")
-    const tx = await FactoryContractWithSigner.createCounterfactualWallet(
-      owner,
-      modules,
-      salt,
+    await web3.eth.accounts.wallet.add(ownerPrivateKey);
+    await web3.eth.accounts.wallet.add(accPrivateKey);
+    await FactoryContractWithSigner.addManager(account);
+    try {
+      futureAddr = await FactoryContract.getAddressForCounterfactualWallet(
+        owner,
+        modules,
+        salt,
+        { from: owner, gasLimit: 8000000, gasPrice: 1000000000 }
+      );
+      setAddressCreated(futureAddr);
+      console.log("Future address: " + futureAddr);
+    } catch (e) {
+      console.log(e);
+    }
+    const ownerSig = await signRefund(
+      futureAddr,
       refundAmount,
       ETH_TOKEN,
-      ownerSig,
-      managerSig,
-      { gasLimit: 8000000, gasPrice: 10000000000 }
+      owner
     );
-    console.log(`Success: ${tx} `);
-  } catch (e) {
-    console.log(e);
-  }
-};
+    const msg = ethers.utils.hexZeroPad(futureAddr, 32);
+    const managerSig = await signMessage(msg, account);
 
-const Register = () => {
+    await web3.eth.sendTransaction({
+      from: owner,
+      to: futureAddr,
+      value: refundAmount,
+      gasLimit: 8000000,
+      gasPrice: 1000000000,
+    });
+    try {
+      // const tx = await FactoryContract.createCounterfactualWallet(owner, modules, salt,  refundAmount, ETH_TOKEN, ownerSig, "0x")
+      const tx = await FactoryContractWithSigner.createCounterfactualWallet(
+        owner,
+        modules,
+        salt,
+        refundAmount,
+        ETH_TOKEN,
+        ownerSig,
+        managerSig,
+        { gasLimit: 8000000, gasPrice: 10000000000 }
+      );
+      console.log(`Success: ${tx} `);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   useEffect(() => {
-    getSignerContract();
+    getSingleCacheData(cacheToFetch.cacheName, cacheToFetch.url);
+    if (addressCached != "") {
+      history.push("/account");
+    } else {
+      getSignerContract();
+    }
   }),
     [];
+
+  useEffect(() => {
+    addDataIntoCache("UserAddress", "http://localhost:8000/", addressCreated);
+  }),
+    [addressCreated];
 
   return (
     <Box
