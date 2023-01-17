@@ -14,6 +14,7 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { ReactComponent as Logo } from "@/assets/logo.svg";
 import { useEffect, useState } from "react";
+import AccountBalanceWallet from "@mui/icons-material/AccountBalanceWallet";
 
 const ethers = require("ethers");
 const Web3 = require("web3");
@@ -37,6 +38,8 @@ const accPrivateKey =
 const ownerAccount = await web3.eth.accounts.privateKeyToAccount(
   "0x" + ownerPrivateKey
 );
+
+const accountNonce = await web3.eth.getTransactionCount(owner);
 
 async function signRefund(wallet: any, amount: any, token: any, signer: any) {
   const message = `0x${[
@@ -108,39 +111,16 @@ function getContract(address: string, ABI: any, library: any, account?: any) {
 
 const Register = () => {
   //useState variables
-  const [addressCreated, setAddressCreated] = useState("");
-  const [addressCached, setAddressCached] = useState("");
+  const [addressStored, setAddressStored] = useState(!localStorage.getItem('UserAddress') ? "" : JSON.parse(localStorage.getItem('UserAddress')!));
 
-  const getSingleCacheData = async (cacheName: string, url: string) => {
-    if (typeof caches === "undefined") return false;
-
-    const cacheStorage = await caches.open(cacheName);
-    const cachedResponse = await cacheStorage.match(url);
-
-    return !cachedResponse || !cachedResponse.ok
-      ? setAddressCached("Fetched failed!")
-      : cachedResponse.json().then((item) => {
-          setAddressCached(item);
-        });
-  };
-
-  // add/fetch cache object
-  const cacheToFetch = {
-    cacheName: "UserAddress",
-    url: "http://localhost:8000/",
-  };
-
-  const addDataIntoCache = (
-    cacheName: string,
-    url: string,
-    response: string
-  ) => {
-    const data = new Response(JSON.stringify(response));
-    if ("caches" in window) {
-      caches.open(cacheName).then((cache) => {
-        cache.put(url, data);
-      });
-    }
+  const getLocalStorageData = async () => {
+    if (localStorage.getItem('UserAddress') === "")
+      return "Fetching data failed";
+    const items = await JSON.parse(
+      localStorage.getItem('UserAddress')!
+    );
+    setAddressStored(items);
+    //localStorage.setItem("UserAddress", JSON.stringify(addressStored));
   };
 
   const createClick = async () => {
@@ -160,7 +140,7 @@ const Register = () => {
         salt,
         { from: owner, gasLimit: 8000000, gasPrice: 1000000000 }
       );
-      setAddressCreated(futureAddr);
+      setAddressStored(futureAddr);
       console.log("Future address: " + futureAddr);
     } catch (e) {
       console.log(e);
@@ -174,13 +154,14 @@ const Register = () => {
     const msg = ethers.utils.hexZeroPad(futureAddr, 32);
     const managerSig = await signMessage(msg, account);
 
-    await web3.eth.sendTransaction({
+    const receipts = await web3.eth.sendTransaction({
       from: owner,
       to: futureAddr,
       value: refundAmount,
       gasLimit: 8000000,
       gasPrice: 1000000000,
     });
+    console.log("Send Transaction receipt: " + receipts);
     try {
       // const tx = await FactoryContract.createCounterfactualWallet(owner, modules, salt,  refundAmount, ETH_TOKEN, ownerSig, "0x")
       const tx = await FactoryContractWithSigner.createCounterfactualWallet(
@@ -200,8 +181,10 @@ const Register = () => {
   };
 
   useEffect(() => {
-    getSingleCacheData(cacheToFetch.cacheName, cacheToFetch.url);
-    if (addressCached != "") {
+    getLocalStorageData();
+    console.log("Address stored: " + addressStored)
+    if (addressStored.length !== 0) {
+      localStorage.setItem('UserAddress', addressStored);
       history.push("/account");
     } else {
       getSignerContract();
@@ -210,9 +193,10 @@ const Register = () => {
     [];
 
   useEffect(() => {
-    addDataIntoCache("UserAddress", "http://localhost:8000/", addressCreated);
+      localStorage.setItem('UserAddress', JSON.stringify(addressStored));
+      //history.push("/account");
   }),
-    [addressCreated];
+    [addressStored];
 
   return (
     <Box

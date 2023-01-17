@@ -10,6 +10,7 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import Typography from '@mui/material/Typography';
+import { useEffect, useState } from 'react';
 const H2 = styled.h2`
 font-weight: 600;
 font-size: 32px;
@@ -38,6 +39,7 @@ const Ms = styled.div`font-size: 13px;
 line-height: 18px;
 color: rgb(143, 142, 140);
 margin: 0px;`
+
 export default function Trade() {
   return <Box>
     <Typography variant="h2">Activity</Typography>
