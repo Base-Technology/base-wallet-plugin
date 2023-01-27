@@ -4,6 +4,23 @@ import Box, { BoxProps } from '@mui/material/Box';
 import Tooltip from '@mui/material/Tooltip';
 import { styled } from '@mui/material/styles';
 
+const shortAddress = (
+	address: string,
+	preLength = 6,
+	endLength = 4,
+	skipStr = "..."
+  ) => {
+	const totalLength = preLength + skipStr.length + endLength;
+	if (address.length > totalLength) {
+	  return (
+		address.substr(0, preLength) +
+		skipStr +
+		address.substr(address.length - endLength, address.length)
+	  );
+	}
+	return address;
+  };
+
 const CopyBox = styled(Box)<BoxProps>(({ theme }) => ({
 	borderRadius: '12px',
 	padding: '4px 10px',
@@ -27,6 +44,7 @@ export default function AcyCopy(props: any) {
 
 	const handleTooltipOpen = () => {
 		setOpen(true);
+		navigator.clipboard.writeText(props.children);
 		// setTimeout(() => {
 		// 	setOpen(false);
 		// }, 1000);
@@ -46,7 +64,7 @@ export default function AcyCopy(props: any) {
 		title={!open && 'Click to copy address' || "Copied!"}
 	>
 		<CopyBox onClick={handleTooltipOpen}>
-			{props.children}
+			{shortAddress(props.children)}
 			<ContentCopyIcon sx={{ fontSize: '12px' }} />
 		</CopyBox>
 	</Tooltip>
