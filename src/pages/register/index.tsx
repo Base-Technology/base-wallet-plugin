@@ -183,7 +183,7 @@ const Register = () => {
   useEffect(() => {
     getLocalStorageData();
     console.log("Address stored: " + addressStored)
-    if (addressStored.length !== 0) {
+    if (addressStored &&addressStored.length !== 0) {
       localStorage.setItem('UserAddress', addressStored);
       history.push("/account");
     } else {
@@ -218,7 +218,7 @@ const Register = () => {
       >
         <Logo style={{ width: "80px" }} />
         <Box sx={{ padding: "2rem" }}>
-          <Typography variant="h2">ACY Wallet</Typography>
+          <Typography variant="h2">Base Wallet</Typography>
         </Box>
       </Box>
       <Box sx={{ padding: "16px 0 24px ", textAlign: "center" }}>

@@ -87,7 +87,7 @@ const DocsPage = () => {
               <span>0.11 ETH</span>
             </Box>
           </ListItemButton>
-          <ListItemButton>
+          {/* <ListItemButton>
             <ListItemIcon>
               <img
                 width={40}
@@ -104,7 +104,7 @@ const DocsPage = () => {
               <span>Acy</span>
               <span>12,232 ACY</span>
             </Box>
-          </ListItemButton>
+          </ListItemButton> */}
           <ListItemButton>
             <ListItemIcon>
               <img

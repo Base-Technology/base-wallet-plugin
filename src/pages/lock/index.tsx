@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
-import { ReactComponent as Logo } from '@/assets/logo.svg';
+import { ReactComponent as Logo } from '@/assets/logo1.svg';
 const Lock = () => {
     return (
         <Box sx={{

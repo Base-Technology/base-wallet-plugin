@@ -28,7 +28,7 @@ export default function BasicList() {
         <AcyPageWrapper title="Privacy">
             <Box sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper' }}>
                 <List>
-                    <CustomListItem text="Use AcyWallet Services" to="#/settings/developersettings/managenetworks" />
+                    <CustomListItem text="Use BaseWallet Services" to="#/settings/developersettings/managenetworks" />
                     <Divider />
                     <CustomListItem text="Automatic Error Reporting" to="#/settings/developersettings/smartcontractdevelopment" />
                 </List>

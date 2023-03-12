@@ -16,7 +16,7 @@ export default {
     type: 'hash'
   },
   routes: [
-    { path: '/', redirect: '/register' },
+    { path: '/', redirect: '/account' },
     {
       path: '/account',
       component: '@/layouts/Main',
